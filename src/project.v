@@ -23,26 +23,25 @@ module tt_um_kaipereira_spicontroller (
 
   wire cpol; // Clock polarity
   wire cpha; // Clock phase
-  wire done; // Whole byte that's been sent to the controller 
   wire reset; // Reset signal
+  wire done; // Signal once a byte has been received
+  wire write_protect; // Prevent accidental writes 
+  wire hold; // Pause communication without CS important so you don't stop the master clock or deselect the slave
 
+  assign uio_oe[0] = 1'b0;
+  assign uio_oe[1] = 1'b1;
+  assign uio_oe[2:3] = 2'b00;
+  assign uio_oe[4] = 1'b1;
+  assign uio_oe[5:7] = 3'b000;
 
-  // Mapping input wires
-  assign spi_cs_n = ui_in[0];
-  assign spi_clk = ui_in[1];
-  assign spi_miso = ui_in[2];
-  assign cpol = ui_in[3];
-  assign cpha = ui_in[4];
-  assign reset = ui_in[5];
-
-  // Mapping output wires
-  assign ui_out[0] = spi_mosi;
-  assign ui_out[1] = done;
-
-
-  // All output pins must be assigned. If not used, assign to 0.
-  assign uo_out  = ui_in + uio_in;  // Example: ou_out is the sum of ui_in and uio_in
-  assign uio_out = 0; assign uio_oe  = 0;
+  assign spi_cs_n = uio_in[0];
+  assign spi_mosi = uio_out[1];
+  assign spi_miso = uio_in[2];
+  assign spi_clk = uio_in[3];
+  assign done = uio_out[4];
+  assign reset = uio_in[5];
+  assign write_protection = uio_in[6];
+  assign hold = uio_in[7];
 
   // List all unused inputs to prevent warnings
   wire _unused = &{ena, clk, rst_n, 1'b0};
