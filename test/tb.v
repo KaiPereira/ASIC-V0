@@ -23,7 +23,6 @@ module tb ();
   wire [7:0] uio_out;
   wire [7:0] uio_oe;
 
-  // Replace tt_um_example with your module name:
   tt_um_kaipereira_spicontroller user_project (
       .ui_in  (ui_in),    // Dedicated inputs
       .uo_out (uo_out),   // Dedicated outputs
@@ -34,5 +33,18 @@ module tb ();
       .clk    (clk),      // clock
       .rst_n  (rst_n)     // not reset
   );
+
+  initial begin
+    send_byte(8'b0101_0101):
+    #100;
+    $finish;
+  end
+
+  task send_byte(input [7:0] byte);
+    begin
+      uio_in[3] = 1'b1;
+      #50 uio_in[3] = 1'b0;
+    end
+  endtask
 
 endmodule

@@ -28,19 +28,15 @@ module tt_um_kaipereira_spicontroller (
   wire cpol = 1'b0; // Clock polarity
   wire cpha = 1'b0; // Clock phase
 
-  assign uio_oe[0] = 1'b0;
-  assign uio_oe[1] = 1'b1;
-  assign uio_oe[3:2] = 2'b00;
-  assign uio_oe[4] = 1'b1;
-  assign uio_oe[7:5] = 3'b000;
+  assign uio_oe[7:0] = 8'b0010_1000;
 
   assign spi_cs_n = uio_in[0];
-  assign spi_mosi = uio_out[1];
-  assign spi_miso = uio_in[2];
+  assign spi_mosi = uio_in[1];
+  assign uio_out[2] = spi_miso;
   assign spi_sclk = uio_in[3];
   assign uio_out[4] = done;
   assign reset = uio_in[5];
-  assign uio_in[6] = write_protect;
+  assign write_protect = uio_in[6] ;
   assign hold = uio_in[7];
 
   // Shift registers for the stable SCLK and CS signals
@@ -48,8 +44,9 @@ module tt_um_kaipereira_spicontroller (
   reg [1:0] cs_reg;
 
   // Sample on each clock edge or whenever RST changes
+  // Implement CPOL and CPHA still
   always @(posedge clk, negedge rst_n) begin
-    if (!rst_n) begin
+    if (!rst_n) begin // if there's a reset, put everything into it's known state
       sclk_reg <= 2'b00;
       cs_reg <= 2'b11;
     end else begin
@@ -59,6 +56,6 @@ module tt_um_kaipereira_spicontroller (
   end
 
   // List all unused inputs to prevent warnings
-  wire _unused = &{ena, rst_n, 1'b0};
+  wire _unused = &{ena, 1'b0};
 
 endmodule
