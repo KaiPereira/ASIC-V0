@@ -17,16 +17,16 @@ module tt_um_kaipereira_spicontroller (
 );
 
   wire spi_cs_n; // _n postfixes to denote an active-low signal because the microcontroller wants to communicate when it's low
-  wire spi_clk;
+  wire spi_sclk; // This is the clock signal coming from the master
   wire spi_miso; // Master in, slave out
   wire spi_mosi; // Master out, slave in
-
-  wire cpol; // Clock polarity
-  wire cpha; // Clock phase
   wire reset; // Reset signal
   wire done; // Signal once a byte has been received
   wire write_protect; // Prevent accidental writes by pulling low
   wire hold; // Pause communication without CS important so you don't stop the master clock or deselect the slave
+
+  wire cpol = 1'b0; // Clock polarity
+  wire cpha = 1'b0; // Clock phase
 
   assign uio_oe[0] = 1'b0;
   assign uio_oe[1] = 1'b1;
@@ -37,13 +37,28 @@ module tt_um_kaipereira_spicontroller (
   assign spi_cs_n = uio_in[0];
   assign spi_mosi = uio_out[1];
   assign spi_miso = uio_in[2];
-  assign spi_clk = uio_in[3];
+  assign spi_sclk = uio_in[3];
   assign uio_out[4] = done;
   assign reset = uio_in[5];
   assign uio_in[6] = write_protect;
   assign hold = uio_in[7];
 
+  // Shift registers for the stable SCLK and CS signals
+  reg [1:0] sclk_reg;
+  reg [1:0] cs_reg;
+
+  // Sample on each clock edge or whenever RST changes
+  always @(posedge clk, negedge rst_n) begin
+    if (!rst_n) begin
+      sclk_reg <= 2'b00;
+      cs_reg <= 2'b11;
+    end else begin
+      sclk_reg <= {sclk_reg[0], spi_sclk};
+      cs_reg <= {cs_reg[0], spi_cs_n};
+    end
+  end
+
   // List all unused inputs to prevent warnings
-  wire _unused = &{ena, clk, rst_n, 1'b0};
+  wire _unused = &{ena, rst_n, 1'b0};
 
 endmodule
