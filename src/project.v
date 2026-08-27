@@ -25,22 +25,22 @@ module tt_um_kaipereira_spicontroller (
   wire cpha; // Clock phase
   wire reset; // Reset signal
   wire done; // Signal once a byte has been received
-  wire write_protect; // Prevent accidental writes 
+  wire write_protect; // Prevent accidental writes by pulling low
   wire hold; // Pause communication without CS important so you don't stop the master clock or deselect the slave
 
   assign uio_oe[0] = 1'b0;
   assign uio_oe[1] = 1'b1;
-  assign uio_oe[2:3] = 2'b00;
+  assign uio_oe[3:2] = 2'b00;
   assign uio_oe[4] = 1'b1;
-  assign uio_oe[5:7] = 3'b000;
+  assign uio_oe[7:5] = 3'b000;
 
   assign spi_cs_n = uio_in[0];
   assign spi_mosi = uio_out[1];
   assign spi_miso = uio_in[2];
   assign spi_clk = uio_in[3];
-  assign done = uio_out[4];
+  assign uio_out[4] = done;
   assign reset = uio_in[5];
-  assign write_protection = uio_in[6];
+  assign uio_in[6] = write_protect;
   assign hold = uio_in[7];
 
   // List all unused inputs to prevent warnings
