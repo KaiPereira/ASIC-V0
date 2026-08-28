@@ -28,7 +28,7 @@ module tt_um_kaipereira_spicontroller (
   wire cpol = 1'b0; // Clock polarity
   wire cpha = 1'b0; // Clock phase
 
-  assign uio_oe[7:0] = 8'b0010_1000;
+  assign uio_oe[7:0] = 8'b0001_0100;
 
   assign spi_cs_n = uio_in[0];
   assign spi_mosi = uio_in[1];

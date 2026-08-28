@@ -3,7 +3,7 @@
 
 import cocotb
 from cocotb.clock import Clock
-from cocotb.triggers import ClockCycles, Timer
+from cocotb.triggers import ClockCycles, Timer, FallingEdge, RisingEdge, ValueChange
 
 
 async def sck_clock(dut, pin, period_ns):
@@ -12,6 +12,43 @@ async def sck_clock(dut, pin, period_ns):
         await Timer(period_ns / 2, unit="ns");
         dut.uio_in.value = int(dut.uio_in.value) & ~(1 << pin);
         await Timer(period_ns / 2, unit="ns");
+
+async def get_edge(dut, bit, rising: bool):
+    prev_bit = (int(dut.uio_in) >> bit) & 1;
+
+    while True:
+        # Wait for the value to change
+        await ValueChange(dut.uio_in);
+
+        # Sample it after the change
+        bit = (int(dut.uio_in.value) >> bit) & 1;
+
+        # Check if it rose or fell
+        if ((prev_bit < bit) and rising):
+            return;
+        elif ((prev_bit > bit) and not rising):
+            return;
+
+        # Set the initial bit to the current bit for the next sample
+        prev_bit = bit;
+
+async def send_byte(dut, byte):
+    for i in range(8):
+        # Wait for the falling edge of the serial clock
+        await get_edge(dut, 3, False)
+
+        # Shift the bit and mask out everything except the last bit
+        bit = (byte >> i) & 1;
+
+        # Send that bit over MOSI on each edge high
+        dut.uio_in.value = int(dut.uio_in.value) | (bit << 2)
+
+        # Wait for the falling edge and then set low again
+        await get_edge(dut, 3, True)
+
+        # End the transfer of the bit by flipping the MOSI line
+        dut.uio_in.value = int(dut.uio_in.value) & ~(bit << 2)
+
 
 @cocotb.test()
 async def test_project(dut):
@@ -35,6 +72,8 @@ async def test_project(dut):
     await Timer(67, units="ns")
     cocotb.start_soon(sck_clock(dut, 3, 250));
 
+    await ClockCycles(dut.clk, 10)
+    cocotb.start_soon(send_byte(dut, 0xAA))
 
 
     dut._log.info("Test project behavior")

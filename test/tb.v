@@ -33,20 +33,4 @@ module tb ();
       .rst_n  (rst_n)     // not reset
   );
 
-  //task send_byte(input [7:0] data);
-    //begin
-      //uio_in[3] = 1'b1;
-      //#250 uio_in[3] = 1'b0;
-    //end
-  //endtask
-  
-  //initial begin
-    //repeat(1000) begin
-      //send_byte(8'b0101_0101);
-      //#250;
-    //end
-//
-    //$finish;
-  //end
-
 endmodule
