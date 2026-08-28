@@ -18,8 +18,7 @@ module tb ();
   reg rst_n;
   reg ena;
   reg [7:0] ui_in;
-  reg [7:0] uio_in;
-  wire [7:0] uo_out;
+  reg [7:0] uio_in; wire [7:0] uo_out;
   wire [7:0] uio_out;
   wire [7:0] uio_oe;
 
@@ -34,17 +33,20 @@ module tb ();
       .rst_n  (rst_n)     // not reset
   );
 
-  initial begin
-    send_byte(8'b0101_0101):
-    #100;
-    $finish;
-  end
-
-  task send_byte(input [7:0] byte);
+  task send_byte(input [7:0] data);
     begin
       uio_in[3] = 1'b1;
-      #50 uio_in[3] = 1'b0;
+      #250 uio_in[3] = 1'b0;
     end
   endtask
+  
+  initial begin
+    repeat(1000) begin
+      send_byte(8'b0101_0101);
+      #250;
+    end
+
+    $finish;
+  end
 
 endmodule
