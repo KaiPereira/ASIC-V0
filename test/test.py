@@ -31,7 +31,11 @@ async def test_project(dut):
     await ClockCycles(dut.clk, 10)
     dut.rst_n.value = 1
 
+    # Phase offset to simulate the serial clock delay from the master controller
+    await Timer(67, units="ns")
     cocotb.start_soon(sck_clock(dut, 3, 250));
+
+
 
     dut._log.info("Test project behavior")
 
