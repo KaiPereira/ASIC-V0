@@ -21,16 +21,16 @@ async def get_edge(dut, bit, rising: bool):
         await ValueChange(dut.uio_in);
 
         # Sample it after the change
-        bit = (int(dut.uio_in.value) >> bit) & 1;
+        current_bit = (int(dut.uio_in.value) >> bit) & 1;
 
         # Check if it rose or fell
-        if ((prev_bit < bit) and rising):
+        if ((prev_bit < current_bit) and rising):
             return;
-        elif ((prev_bit > bit) and not rising):
+        elif ((prev_bit > current_bit) and not rising):
             return;
 
         # Set the initial bit to the current bit for the next sample
-        prev_bit = bit;
+        prev_bit = current_bit;
 
 async def send_byte(dut, byte):
     for i in range(8):
@@ -73,7 +73,7 @@ async def test_project(dut):
     cocotb.start_soon(sck_clock(dut, 3, 250));
 
     await ClockCycles(dut.clk, 10)
-    cocotb.start_soon(send_byte(dut, 0xAA))
+    cocotb.start_soon(send_byte(dut, 0xAB))
 
 
     dut._log.info("Test project behavior")
