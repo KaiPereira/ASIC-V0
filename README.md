@@ -4,7 +4,7 @@
 
 This is my custom SPI slave ASIC I've decided to make in order to learn how to make my own chip from start to end.
 
-It essentially receives the MOSI signal from the master controller and then just re-sends it over MISO but it was surprisingly challenging for me to make because it's my first Verilog project, but it was so much fun!
+It simply receives the MOSI signal from the master controller and then just re-sends it over MISO but it was surprisingly challenging for me to make because it's my first Verilog project, but it was so much fun!
 
 ## Setup
 
