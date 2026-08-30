@@ -58,6 +58,13 @@ module tt_um_kaipereira_spicontroller (
     end
   end
 
+  // Detect the falling or rising edge of the signal
+  // Shift the falling or rising edge low after one cycle of CLK
+  // Check if falling/rising is high, and sample/send if it is
+  // If falling/rising is low, don't sample/send
+  wire rising_edge;
+  wire falling_edge;
+
   // List all unused inputs to prevent warnings
   wire _unused = &{ena, 1'b0};
 
