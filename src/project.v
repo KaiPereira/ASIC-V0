@@ -40,7 +40,7 @@ module tt_um_kaipereira_spicontroller (
   assign hold = uio_in[7];
 
   // Shift registers for the stable SCLK and CS signals
-  reg [1:0] sclk_reg;
+  reg [2:0] sclk_reg;
   reg [1:0] cs_reg;
   reg [1:0] mosi_reg;
 
@@ -48,11 +48,11 @@ module tt_um_kaipereira_spicontroller (
   // Implement CPOL and CPHA still
   always @(posedge clk, negedge rst_n) begin
     if (!rst_n) begin // if there's a reset, put everything into it's known state
-      sclk_reg <= 2'b00;
+      sclk_reg <= 3'b000;
       cs_reg <= 2'b11;
       mosi_reg <= 2'b00;
     end else begin
-      sclk_reg <= {sclk_reg[0], spi_sclk};
+      sclk_reg <= {sclk_reg[1:0], spi_sclk}; // Hold another bit to get the state of the last cycle for the rising/falling edge detector
       cs_reg <= {cs_reg[0], spi_cs_n};
       mosi_reg <= {mosi_reg[0], spi_mosi};
     end
@@ -62,8 +62,16 @@ module tt_um_kaipereira_spicontroller (
   // Shift the falling or rising edge low after one cycle of CLK
   // Check if falling/rising is high, and sample/send if it is
   // If falling/rising is low, don't sample/send
-  wire rising_edge;
-  wire falling_edge;
+  wire rising_edge = sclk_reg[1] & ~sclk_reg[2]; 
+  wire falling_edge = ~sclk_reg[2] & sclk_reg[2];
+
+  always @(posedge clk, negedge rst_n) begin
+    if (rising_edge) begin
+      // Shift MOSI into the byte buffer
+    end else if (falling_edge) begin
+      // Send MOSI out over MISO
+    end
+  end
 
   // List all unused inputs to prevent warnings
   wire _unused = &{ena, 1'b0};
