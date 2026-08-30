@@ -42,6 +42,7 @@ module tt_um_kaipereira_spicontroller (
   // Shift registers for the stable SCLK and CS signals
   reg [1:0] sclk_reg;
   reg [1:0] cs_reg;
+  reg [1:0] mosi_reg;
 
   // Sample on each clock edge or whenever RST changes
   // Implement CPOL and CPHA still
@@ -49,9 +50,11 @@ module tt_um_kaipereira_spicontroller (
     if (!rst_n) begin // if there's a reset, put everything into it's known state
       sclk_reg <= 2'b00;
       cs_reg <= 2'b11;
+      mosi_reg <= 2'b00;
     end else begin
       sclk_reg <= {sclk_reg[0], spi_sclk};
       cs_reg <= {cs_reg[0], spi_cs_n};
+      mosi_reg <= {mosi_reg[0], spi_mosi};
     end
   end
 

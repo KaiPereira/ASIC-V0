@@ -6,7 +6,7 @@ from cocotb.clock import Clock
 from cocotb.triggers import ClockCycles, Timer, FallingEdge, RisingEdge, ValueChange
 
 
-async def sck_clock(dut, pin, period_ns):
+async def sclk_clock(dut, pin, period_ns):
     while True:
         dut.uio_in.value = int(dut.uio_in.value) | (1 << pin);
         await Timer(period_ns / 2, unit="ns");
@@ -70,7 +70,7 @@ async def test_project(dut):
 
     # Phase offset to simulate the serial clock delay from the master controller
     await Timer(67, units="ns")
-    cocotb.start_soon(sck_clock(dut, 3, 250));
+    cocotb.start_soon(sclk_clock(dut, 3, 250));
 
     # Start sending data from the master device after 10 clock cycles just to simulate something random
     await ClockCycles(dut.clk, 10)
