@@ -41,13 +41,13 @@ async def send_byte(dut, byte):
         bit = (byte >> i) & 1;
 
         # Send that bit over MOSI on each edge high
-        dut.uio_in.value = int(dut.uio_in.value) | (bit << 2)
+        dut.uio_in.value = int(dut.uio_in.value) | (bit << 1)
 
         # Wait for the falling edge and then set low again
         await get_edge(dut, 3, True)
 
         # End the transfer of the bit by flipping the MOSI line
-        dut.uio_in.value = int(dut.uio_in.value) & ~(bit << 2)
+        dut.uio_in.value = int(dut.uio_in.value) & ~(bit << 1)
 
 
 @cocotb.test()
@@ -72,6 +72,7 @@ async def test_project(dut):
     await Timer(67, units="ns")
     cocotb.start_soon(sck_clock(dut, 3, 250));
 
+    # Start sending data from the master device after 10 clock cycles just to simulate something random
     await ClockCycles(dut.clk, 10)
     cocotb.start_soon(send_byte(dut, 0xAB))
 
