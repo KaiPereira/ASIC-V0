@@ -34,8 +34,8 @@ async def get_edge(dut, bit, rising: bool):
 
 async def send_byte(dut, byte):
     for i in range(8):
-        # Wait for the falling edge of the serial clock
-        await get_edge(dut, 3, False)
+        # Wait for the rising edge of the serial clock
+        await get_edge(dut, 3, True)
 
         # Shift the bit and mask out everything except the last bit
         bit = (byte >> i) & 1;
@@ -44,7 +44,7 @@ async def send_byte(dut, byte):
         dut.uio_in.value = int(dut.uio_in.value) | (bit << 1)
 
         # Wait for the falling edge and then set low again
-        await get_edge(dut, 3, True)
+        await get_edge(dut, 3, False)
 
         # End the transfer of the bit by flipping the MOSI line
         dut.uio_in.value = int(dut.uio_in.value) & ~(bit << 1)

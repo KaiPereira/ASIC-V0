@@ -63,15 +63,45 @@ module tt_um_kaipereira_spicontroller (
   // Check if falling/rising is high, and sample/send if it is
   // If falling/rising is low, don't sample/send
   wire rising_edge = sclk_reg[1] & ~sclk_reg[2]; 
-  wire falling_edge = ~sclk_reg[2] & sclk_reg[2];
+  wire falling_edge = ~sclk_reg[1] & sclk_reg[2];
+
+  reg [7:0] tx_byte;
+  reg [7:0] rx_byte;
+  reg [2:0] count;
 
   always @(posedge clk, negedge rst_n) begin
-    if (rising_edge) begin
-      // Shift MOSI into the byte buffer
-    end else if (falling_edge) begin
-      // Send MOSI out over MISO
+    // If reset, flush the buffers and the count
+    if (!rst_n) begin
+      count <= 3'b0;
+      tx_byte <= 8'b0;
+      rx_byte <= 8'b0;
+    end else begin
+      // Transmit/sample only when chip select is low
+      if (rising_edge && !cs_reg[1]) begin
+        // Shift MOSI into the byte buffer
+        rx_byte = {rx_byte[6:0], mosi_reg[1]};
+        
+        // Update the count
+        count <= count + 3'b1;
+
+        if (count == 3'd7) begin
+          count <= 3'b000;
+        end
+      end else if (falling_edge && !cs_reg[1]) begin
+        // Shift the RX buffer into the TX buffer
+        if (count == 3'b000) begin
+          // Load in the byte if it isn't in there yet
+          tx_byte <= rx_byte;
+        end else begin
+          // Slowly shift the bit out
+          tx_byte <= {tx_byte[6:0], 1'b0};
+        end
+      end
     end
   end
+
+  // Send the current bit that's actively getting shifted
+  assign spi_miso = tx_byte[7];
 
   // List all unused inputs to prevent warnings
   wire _unused = &{ena, 1'b0};
