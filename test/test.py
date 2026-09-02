@@ -34,11 +34,11 @@ async def get_edge(dut, bit, rising: bool):
 
 async def send_byte(dut, byte):
     for i in range(8):
+        # Shift the bit and mask out everything except the last bit and send it in the right order
+        bit = (byte >> (7 - i)) & 1;
+
         # Wait for the rising edge of the serial clock
         await get_edge(dut, 3, True)
-
-        # Shift the bit and mask out everything except the last bit
-        bit = (byte >> i) & 1;
 
         # Send that bit over MOSI on each edge high
         dut.uio_in.value = int(dut.uio_in.value) | (bit << 1)
@@ -70,7 +70,7 @@ async def test_project(dut):
 
     # Phase offset to simulate the serial clock delay from the master controller
     await Timer(67, units="ns")
-    cocotb.start_soon(sclk_clock(dut, 3, 250));
+    cocotb.start_soon(sclk_clock(dut, 3, 1000));
 
     # Start sending data from the master device after 10 clock cycles just to simulate something random
     await ClockCycles(dut.clk, 10)
@@ -79,8 +79,8 @@ async def test_project(dut):
 
     dut._log.info("Test project behavior")
 
-    # Wait for one clock cycle to see the output values
-    await ClockCycles(dut.clk, 50)
+    # Wait for many clock cycle to see the output values
+    await ClockCycles(dut.clk, 400)
 
     # The following assersion is just an example of how to check the output values.
     # Change it to match the actual expected output of your module:

@@ -79,7 +79,7 @@ module tt_um_kaipereira_spicontroller (
       // Transmit/sample only when chip select is low
       if (rising_edge && !cs_reg[1]) begin
         // Shift MOSI into the byte buffer
-        rx_byte = {rx_byte[6:0], mosi_reg[1]};
+        rx_byte <= {rx_byte[6:0], mosi_reg[1]};
         
         // Update the count
         count <= count + 3'b1;
@@ -88,7 +88,8 @@ module tt_um_kaipereira_spicontroller (
           count <= 3'b000;
         end
       end else if (falling_edge && !cs_reg[1]) begin
-        // Shift the RX buffer into the TX buffer
+        // Wait for the whole byte to transfer
+        // Then shift RX into TX
         if (count == 3'b000) begin
           // Load in the byte if it isn't in there yet
           tx_byte <= rx_byte;
