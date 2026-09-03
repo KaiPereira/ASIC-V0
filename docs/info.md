@@ -9,12 +9,12 @@ You can also include images in this folder and reference them in the markdown. E
 
 ## How it works
 
-Explain how your project works
+My SPI slave is quite simple...
+
+First, I use a triple flip-flop synchronizer to align the external SCLK clock domain, with the internal CLK clock domain and to also prevent metastability.
+
+Next, I use the internal CLK domain to sample the falling and rising edges of the synchronized SCLK domain and then I shift a full byte of MOSI into a byte buffer on the rising edges, and then once that's complete, I'll shift it out onto MISO on the falling edges.
 
 ## How to test
 
-Explain how to use your project
-
-## External hardware
-
-List external hardware used in your project (e.g. PMOD, LED display, etc), if any
+To test the project, you'll just want to connect up some probes to the SPI MOSI and MISO signals and just check to see if the MOSI signals are being echoed onto the MISO line.
