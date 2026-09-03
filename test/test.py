@@ -5,6 +5,8 @@ import cocotb
 from cocotb.clock import Clock
 from cocotb.triggers import ClockCycles, Timer, FallingEdge, RisingEdge, ValueChange
 
+clk_ns = 62.5
+sclk_ns = 1000 
 
 async def sclk_clock(dut, pin, period_ns):
     while True:
@@ -32,22 +34,31 @@ async def get_edge(dut, bit, rising: bool):
         # Set the initial bit to the current bit for the next sample
         prev_bit = current_bit;
 
-async def send_byte(dut, byte):
+async def send_byte(dut, byte, period_ns):
     for i in range(8):
         # Shift the bit and mask out everything except the last bit and send it in the right order
         bit = (byte >> (7 - i)) & 1;
 
         # Wait for the rising edge of the serial clock
-        await get_edge(dut, 3, True)
-
-        # Send that bit over MOSI on each edge high
-        dut.uio_in.value = int(dut.uio_in.value) | (bit << 1)
-
-        # Wait for the falling edge and then set low again
         await get_edge(dut, 3, False)
 
-        # End the transfer of the bit by flipping the MOSI line
-        dut.uio_in.value = int(dut.uio_in.value) & ~(bit << 1)
+        # Add margin to the start of the signal
+        await Timer(period_ns / 4, unit="ns")
+        if bit:
+            # Push MOSI high if there's a bit
+            dut.uio_in.value = int(dut.uio_in.value) | (1 << 1)
+        else:
+            # Pull MOSI low if there isn't one
+            dut.uio_in.value = int(dut.uio_in.value) & ~(1 << 1)
+
+        # Wait for the falling edge and then set low again
+        await get_edge(dut, 3, True)
+
+        # Add margin to the end of the signal
+        await Timer(period_ns / 4, unit="ns")
+
+    await Timer(period_ns / 2, unit="ns")
+    dut.uio_in.value = int(dut.uio_in.value) & ~(1 << 1)
 
 
 @cocotb.test()
@@ -55,7 +66,7 @@ async def test_project(dut):
     dut._log.info("Start")
 
     # Set the clock period to 0.0625 us (16 MHz)
-    clock = Clock(dut.clk, 62.5, unit="ns")
+    clock = Clock(dut.clk, clk_ns, unit="ns")
 
     cocotb.start_soon(clock.start())
 
@@ -70,11 +81,11 @@ async def test_project(dut):
 
     # Phase offset to simulate the serial clock delay from the master controller
     await Timer(67, units="ns")
-    cocotb.start_soon(sclk_clock(dut, 3, 1000));
+    cocotb.start_soon(sclk_clock(dut, 3, sclk_ns));
 
     # Start sending data from the master device after 10 clock cycles just to simulate something random
     await ClockCycles(dut.clk, 10)
-    cocotb.start_soon(send_byte(dut, 0xAB))
+    cocotb.start_soon(send_byte(dut, 0xAB, sclk_ns))
 
 
     dut._log.info("Test project behavior")
