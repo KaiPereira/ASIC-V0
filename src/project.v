@@ -104,6 +104,11 @@ module tt_um_kaipereira_spicontroller (
   // Send the current bit that's actively getting shifted
   assign spi_miso = tx_byte[7];
 
+  // Assign floating outputs low
+  assign uio_out[1:0] = 2'b0;
+  assign uio_out[7:3] = 5'b0;
+  assign uo_out[7:0] = 8'b0;
+
   // List all unused inputs to prevent warnings
   wire _unused = &{ena, 1'b0};
 
