@@ -21,20 +21,15 @@ module tt_um_kaipereira_spicontroller (
   wire spi_miso; // Master in, slave out
   wire spi_mosi; // Master out, slave in
   wire reset; // Reset signal
-  wire done; // Signal once a byte has been received
   wire write_protect; // Prevent accidental writes by pulling low
   wire hold; // Pause communication without CS important so you don't stop the master clock or deselect the slave
 
-  wire cpol = 1'b0; // Clock polarity
-  wire cpha = 1'b0; // Clock phase
-
-  assign uio_oe[7:0] = 8'b0001_0100;
+  assign uio_oe[7:0] = 8'b0000_0100;
 
   assign spi_cs_n = uio_in[0];
   assign spi_mosi = uio_in[1];
   assign uio_out[2] = spi_miso;
   assign spi_sclk = uio_in[3];
-  assign uio_out[4] = done;
   assign reset = uio_in[5];
   assign write_protect = uio_in[6] ;
   assign hold = uio_in[7];
@@ -71,7 +66,7 @@ module tt_um_kaipereira_spicontroller (
 
   always @(posedge clk, negedge rst_n) begin
     // If reset, flush the buffers and the count
-    if (!rst_n) begin
+    if (!rst_n || cs_reg[1]) begin
       count <= 3'b0;
       tx_byte <= 8'b0;
       rx_byte <= 8'b0;
@@ -104,7 +99,7 @@ module tt_um_kaipereira_spicontroller (
   // Send the current bit that's actively getting shifted
   assign spi_miso = tx_byte[7];
 
-  // Assign floating outputs low
+  // Pull floating outputs low
   assign uio_out[1:0] = 2'b0;
   assign uio_out[7:3] = 5'b0;
   assign uo_out[7:0] = 8'b0;
