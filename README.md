@@ -16,7 +16,7 @@ Next, I use the internal CLK domain to sample the falling and rising edges of th
 
 ## Test Bench
 
-My test bench isn't great, but proves a proof of concept. I generate the internal slave's CLK domain with a frequency of 16 MHz, and then I generate a serial clock that I've simulated coming from an asynchronous master device by offsetting it from the slave's CLK domain.
+My test bench isn't great, but proves a proof of concept. I generate the internal slave's CLK domain with a frequency of 16 MHz, and then I generate a 1 MHz serial clock that I've simulated coming from an asynchronous master device by offsetting it from the slave's CLK domain.
 
 Based off of the serial clock, I send a send a byte with a 1/4 clock cycle buffer on the rising and falling edge on MOSI which is echoed back over MISO by the slave ASIC.
 
