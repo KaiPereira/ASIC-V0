@@ -12,7 +12,8 @@ module tt_um_kaipereira_spicontroller (
     output wire [7:0] uio_out,  // IOs: Output path
     output wire [7:0] uio_oe,   // IOs: Enable path (active high: 0=input, 1=output)
     input  wire       ena,      // always 1 when the design is powered, so you can ignore it
-    input  wire       clk,      // clock input  wire       rst_n     // reset_n - low to reset
+    input  wire       clk,      // clock input  wire       
+    input  wire       rst_n     // reset_n - low to reset
 );
 
   wire spi_cs_n; // _n postfixes to denote an active-low signal because the microcontroller wants to communicate when it's low
@@ -29,6 +30,7 @@ module tt_um_kaipereira_spicontroller (
   assign spi_mosi = uio_in[1];
   assign uio_out[2] = spi_miso;
   assign spi_sclk = uio_in[3];
+  // Not using uio_in[4], matching tinytapeout SPI pinout
   assign reset = uio_in[5];
   assign write_protect = uio_in[6] ;
   assign hold = uio_in[7];
@@ -63,9 +65,9 @@ module tt_um_kaipereira_spicontroller (
   reg [7:0] rx_byte;
   reg [2:0] count;
 
-  always @(posedge clk, negedge rst_n) begin
+  always @(posedge clk, negedge rst_n, negedge reset) begin
     // If reset, flush the buffers and the count
-    if (!rst_n || cs_reg[1]) begin
+    if (!rst_n || cs_reg[1] || !reset) begin
       count <= 3'b0;
       tx_byte <= 8'b0;
       rx_byte <= 8'b0;

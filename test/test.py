@@ -78,6 +78,7 @@ async def test_project(dut):
     dut.rst_n.value = 0
     await ClockCycles(dut.clk, 10)
     dut.rst_n.value = 1
+    dut.uio_in.value = int(dut.uio_in.value) | (1 << 5); # Set the 5th bit high
 
     # Phase offset to simulate the serial clock delay from the master controller
     await Timer(67, units="ns")
