@@ -32,7 +32,7 @@ module tt_um_kaipereira_spicontroller (
   assign spi_sclk = uio_in[3];
   // Not using uio_in[4], matching tinytapeout SPI pinout
   assign reset = uio_in[5];
-  assign write_protect = uio_in[6] ;
+  assign write_protect = uio_in[6];
   assign hold = uio_in[7];
 
   // Shift registers for the stable SCLK and CS signals
