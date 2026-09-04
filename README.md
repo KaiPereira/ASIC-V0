@@ -16,7 +16,7 @@ Next, I use the internal CLK domain to sample the falling and rising edges of th
 
 ## Test Bench
 
-My test bench isn't great, but proves a proof of concept. I generate the internal slave's CLK domain with a frequency of 16 MHz, and then I generate a 1 MHz serial clock that I've simulated coming from an asynchronous master device by offsetting it from the slave's CLK domain.
+My test bench isn't great, but provides a proof of concept. I generate the internal slave's CLK domain with a frequency of 16 MHz, and then I generate a 1 MHz serial clock that I've simulated coming from an asynchronous master device by offsetting it from the slave's CLK domain.
 
 Based off of the serial clock, I send a send a byte with a 1/4 clock cycle buffer on the rising and falling edge on MOSI which is echoed back over MISO by the slave ASIC.
 
@@ -32,6 +32,6 @@ gtkwave tb.fst tb.gtkw
 
 ## Inspiration
 
-This project uses the tinytapeout skeleton which has all of the workflows to build your project and get it ready for manufacturing which I'll eventually do with some future projects!
+This project uses the tinytapeout template which has all of the workflows to build your project and get it ready for manufacturing which I'll eventually do with some future projects!
 
-Thanks to [Julia Desmazes](https://essenceia.github.io/about/) for bringing me into this amazing world too :D 
+Thanks to [Julia Desmazes](https://essenceia.github.io/about/) for bringing me into this amazing world :D 
