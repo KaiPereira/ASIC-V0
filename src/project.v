@@ -65,13 +65,13 @@ module tt_um_kaipereira_spi_slave (
   reg [7:0] rx_byte;
   reg [2:0] count;
 
-  always @(posedge clk, negedge rst_n) begin
+  always @(posedge clk, posedge rst_n, posedge reset) begin
     // If reset, flush the buffers and the count
     if (!rst_n || cs_reg[1] || !reset) begin
       count <= 3'b0;
       tx_byte <= 8'b0;
       rx_byte <= 8'b0;
-    end else if (rst_n || !cs_reg[1] || reset) begin // Synchronous behavior instead of just "else"
+    end else begin
       // Transmit/sample only when chip select is low
       if (rising_edge && !cs_reg[1]) begin
         // Shift MOSI into the byte buffer
