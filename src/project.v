@@ -65,7 +65,7 @@ module tt_um_kaipereira_spi_slave (
   reg [7:0] rx_byte;
   reg [2:0] count;
 
-  always @(posedge clk, negedge rst_n, negedge reset) begin
+  always @(posedge clk, negedge rst_n) begin
     // If reset, flush the buffers and the count
     if (!rst_n || cs_reg[1] || !reset) begin
       count <= 3'b0;
